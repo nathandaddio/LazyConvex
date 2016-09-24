@@ -5,7 +5,7 @@ import pytest
 import gurobipy
 
 
-@pytest.mark.qufl_regression
+@pytest.mark.regression
 def test_qufl_regression():
     """
     Generates an instance of the quadratic uncapacitated facility
