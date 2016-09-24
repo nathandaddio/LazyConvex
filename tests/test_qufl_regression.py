@@ -4,6 +4,9 @@ import pytest
 
 import gurobipy
 
+from lazyConvex.lazyConvex import LazyConvexEngine, ObjectiveFunction
+
+TOLERANCE = 10**(-5)
 
 @pytest.mark.regression
 def test_qufl_regression():
@@ -13,7 +16,7 @@ def test_qufl_regression():
 
     Uses the Kochetov and Ivanenko cost structure.
     """
-    facilities = range(10)
+    facilities = range(7)
 
     facility_costs = [3000 for facility in facilities]
     assignment_costs = [
@@ -85,4 +88,20 @@ def test_qufl_regression():
     # just be the linear facility cost terms
     qufl_model.setObjective(total_facility_cost)
 
-    assert naive_objective
+    from itertools import chain
+
+    objective_vars = list(chain(*is_assigned))
+
+    def obj_fn(*args):
+        return sum(cost * arg**2 for cost, arg in zip(list(chain(*assignment_costs)), args))
+
+    def grad_fn(*args):
+        return [2 * cost * arg for cost, arg in zip(list(chain(*assignment_costs)), args)]
+
+    objective_fn = ObjectiveFunction(obj_fn, grad_fn)
+
+    qufl_lazy_model = LazyConvexEngine(qufl_model, objective_fn, objective_vars)
+
+    qufl_lazy_model.optimize()
+
+    assert abs(naive_objective - qufl_lazy_model.objVal) < TOLERANCE

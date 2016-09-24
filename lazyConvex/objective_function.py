@@ -28,11 +28,6 @@ class ObjectiveFunction(object):
                 value of changing the solution values.
         """
 
-        # Make sure that we fail on objectives with bad arg lists
-        if (len(getargspec(objective).args) !=
-                len(getargspec(objective_gradient).args)):
-            raise ValueError('Objective and gradient must take the same number of arguments')
-
         self._objective = objective
         self._objective_gradient = objective_gradient
 
