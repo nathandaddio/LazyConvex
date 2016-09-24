@@ -4,7 +4,7 @@ import pytest
 
 import gurobipy
 
-from lazyConvex.lazyConvex import LazyConvexEngine, ObjectiveFunction
+from lazyConvex import LazyConvexEngine, ObjectiveFunction
 
 TOLERANCE = 10**(-5)
 

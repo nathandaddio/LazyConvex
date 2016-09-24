@@ -1,6 +1,6 @@
 import pytest
 
-from lazyConvex.lazyConvex import ObjectiveFunction
+from lazyConvex import ObjectiveFunction
 
 
 @pytest.mark.objective_function
