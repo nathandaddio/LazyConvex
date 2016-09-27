@@ -35,6 +35,8 @@ class LazyConvexEngine(object):
         self._objective_functions = objective_functions
 
         self._approximation_variables = self._add_approximation_variables()
+        self._model.update()
+        self._starting_cuts = self._add_starting_cuts()
 
     def _add_approximation_variables(self):
         return {
@@ -44,7 +46,19 @@ class LazyConvexEngine(object):
         }
 
     def _add_starting_cuts(self):
-        pass
+        return {
+            (objective_function, num):
+                self._add_approximation(
+                    model=self._model,
+                    approximation_variable=self._approximation_variables[objective_function],
+                    objective_function=objective_function,
+                    actual_value=objective_function.get_objective(starting_values),
+                    objective_variable_values=starting_values,
+                    constraint_adder=self._model.addConstr
+                )
+            for objective_function in self._objective_functions
+            for num, starting_values in enumerate(objective_function.starting_values)
+        }
 
     def optimize(self):
         # Hackily make a partial function here because
@@ -85,19 +99,18 @@ class LazyConvexEngine(object):
         return approximation_value, objective_variable_values, actual_value
 
     def _add_approximation(self, model, approximation_variable, objective_function,
-                           actual_value, objective_variable_values):
+                           actual_value, objective_variable_values,
+                           constraint_adder=None):
         """
         Adds convex outer approximation of the form
         f(x) >= f(a) + grad(f)(a) * (x-a)
         """
         gradient = objective_function.get_gradient(objective_variable_values)
-        print gradient
-        print list(zip(
-                    gradient,
-                    objective_function.variables,
-                    objective_variable_values
-                ))
-        model.cbLazy(
+
+        if constraint_adder is None:
+            constraint_adder = model.cbLazy
+
+        return constraint_adder(
             approximation_variable >=
             actual_value +
             gurobipy.quicksum(

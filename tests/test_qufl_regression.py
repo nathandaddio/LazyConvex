@@ -105,7 +105,7 @@ def test_qufl_regression():
 
     objective_fns = [
         ObjectiveFunction(
-            get_obj_fn(assign_cost), get_grad_fn(assign_cost), [objective_var]
+            get_obj_fn(assign_cost), get_grad_fn(assign_cost), [objective_var], [[0.5]]
         )
         for objective_var, assign_cost in
         zip(list(chain(*is_assigned)), list(chain(*assignment_costs)))

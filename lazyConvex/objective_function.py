@@ -18,7 +18,7 @@ class ObjectiveFunction(object):
     such that they can overriden on a subclass if we want
     to do symbolic computations and the like.
     """
-    def __init__(self, objective, objective_gradient, variables, starting_cuts=None):
+    def __init__(self, objective, objective_gradient, variables, starting_values=None):
         """
         Args:
             objective: an objective function f that takes a vector of
@@ -28,7 +28,7 @@ class ObjectiveFunction(object):
                 value of changing the solution values.
             variables: the gurobi variables that are in this objective
                 function.
-            starting_cuts: a list of lists of values of variables to
+            starting_value: a list of lists of values of variables to
                 add starting cuts to the model at.
         """
 
@@ -43,7 +43,7 @@ class ObjectiveFunction(object):
         self._objective = objective
         self._objective_gradient = objective_gradient
         self.variables = variables
-        self.starting_cuts = starting_cuts
+        self.starting_values = starting_values or []
 
     def get_objective(self, solution_values):
         return self._objective(*solution_values)
