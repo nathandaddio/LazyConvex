@@ -12,7 +12,7 @@ Formulate your ``model`` as usual in Gurobipy, but leave out the `f(x)` term. Cr
 ```python
 objective = ObjectiveFunction(fn, grad_fn, gurobi_vars)
 ```
-where ``fn`` is the objective term, ``grad_fn`` is the gradient (or subgradient) of the function ``fn``, and ``gurobi_vars`` are the specific gurobi variables that this function should be evaluated at.
+where ``fn`` is a python function representing objective term, ``grad_fn`` is the gradient (or subgradient) of the function ``fn``, and ``gurobi_vars`` is a list of the specific gurobi variables that this function should be evaluated at.
 Then, create an instance of the ``LazyConvexEngine`` and call ``optimize()`` to solve the problem.
 ```python
 engine = LazyConvexEngine(model, [objective])
