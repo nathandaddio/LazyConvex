@@ -14,9 +14,11 @@ def test_objective_function_validates_bad_arg_lengths():
     def different_argument_gradient(x):
         return [1, 1]
 
+    variables = []
+
     # Make sure it works with the actual gradient
-    ObjectiveFunction(fn, actual_gradient)
+    ObjectiveFunction(fn, actual_gradient, variables)
 
     # Make sure it fails on a gradient function with bad args
     with pytest.raises(ValueError):
-        ObjectiveFunction(fn, different_argument_gradient)
+        ObjectiveFunction(fn, different_argument_gradient, variables)

@@ -18,7 +18,7 @@ class ObjectiveFunction(object):
     such that they can overriden on a subclass if we want
     to do symbolic computations and the like.
     """
-    def __init__(self, objective, objective_gradient):
+    def __init__(self, objective, objective_gradient, variables, starting_cuts=None):
         """
         Args:
             objective: an objective function f that takes a vector of
@@ -26,6 +26,10 @@ class ObjectiveFunction(object):
             objective_gradient: the gradient of the above objective function
                 i.e. grad(f), that gives us information about the objective
                 value of changing the solution values.
+            variables: the gurobi variables that are in this objective
+                function.
+            starting_cuts: a list of lists of values of variables to
+                add starting cuts to the model at.
         """
 
         # Make sure that we fail on objectives with bad arg lists
@@ -38,6 +42,8 @@ class ObjectiveFunction(object):
 
         self._objective = objective
         self._objective_gradient = objective_gradient
+        self.variables = variables
+        self.starting_cuts = starting_cuts
 
     def get_objective(self, solution_values):
         return self._objective(*solution_values)

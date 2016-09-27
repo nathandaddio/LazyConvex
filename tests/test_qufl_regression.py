@@ -8,6 +8,7 @@ from lazyConvex import LazyConvexEngine, ObjectiveFunction
 
 TOLERANCE = 10**(-5)
 
+
 @pytest.mark.regression
 def test_qufl_regression():
     """
@@ -92,15 +93,25 @@ def test_qufl_regression():
 
     objective_vars = list(chain(*is_assigned))
 
-    def obj_fn(*args):
-        return sum(cost * arg**2 for cost, arg in zip(list(chain(*assignment_costs)), args))
+    def get_obj_fn(assignment_cost):
+        def f(x):
+            return assignment_cost * x ** 2
+        return f
 
-    def grad_fn(*args):
-        return [2 * cost * arg for cost, arg in zip(list(chain(*assignment_costs)), args)]
+    def get_grad_fn(assignment_cost):
+        def g(x):
+            return [2 * assignment_cost * x]
+        return g
 
-    objective_fn = ObjectiveFunction(obj_fn, grad_fn)
+    objective_fns = [
+        ObjectiveFunction(
+            get_obj_fn(assign_cost), get_grad_fn(assign_cost), [objective_var]
+        )
+        for objective_var, assign_cost in
+        zip(list(chain(*is_assigned)), list(chain(*assignment_costs)))
+    ]
 
-    qufl_lazy_model = LazyConvexEngine(qufl_model, objective_fn, objective_vars)
+    qufl_lazy_model = LazyConvexEngine(qufl_model, objective_fns, objective_vars)
 
     qufl_lazy_model.optimize()
 
