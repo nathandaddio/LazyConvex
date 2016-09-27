@@ -1,5 +1,5 @@
 # lazyConvex
-Uses Convex outer approximation and dynamic constraint generation within branch and bound to solve convex mixed-integer nonlinear programming problems with Gurobi.
+Uses Convex outer approximation and dynamic constraint generation within branch and bound to solve convex mixed-integer nonlinear programming problems with Gurobi and Python.
 Specifically solves problems of the form
 ```
 min c^T * y + f(x)
@@ -19,3 +19,5 @@ engine = LazyConvexEngine(model, [objective])
 engine.optimize()
 ```
 This will then utilise Gurobi's lazy constraints to dynamically approximate the value of the objective function.
+
+Has further functionality around adding starting cuts and warm starting at the root node.

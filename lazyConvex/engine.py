@@ -29,13 +29,24 @@ def get_value_lookup(model, where):
 
 
 class LazyConvexEngine(object):
-    def __init__(self, model, objective_functions, objective_variables):
+    def __init__(self, model, objective_functions, run_warm_start=True):
+        """
+        Args:
+            model: the gurobipy model, missing the convex objective terms
+            objective_functions: a list of ObjectiveFunction objects that
+                are the missing convex objective terms
+            warm_start: runs a warm start at the root node to generate
+                further cuts on the LP relaxation of the model
+
+        """
         self._model = model
         self._model.setParam('LazyConstraints', 1)
         self._objective_functions = objective_functions
+        self._run_warm_start = run_warm_start
 
         self._approximation_variables = self._add_approximation_variables()
         self._model.update()
+
         self._starting_cuts = self._add_starting_cuts()
 
     def _add_approximation_variables(self):
@@ -74,7 +85,8 @@ class LazyConvexEngine(object):
 
     def _approximation_callback(self, model, where):
         at_mip_sol = where == MIPSOL
-        at_root_node = (where == MIPNODE and
+        at_root_node = (self._run_warm_start and
+                        where == MIPNODE and
                         model.cbGet(NODE_COUNT) == 0 and
                         model.cbGet(MIPNODE_STATUS) == 2)
 

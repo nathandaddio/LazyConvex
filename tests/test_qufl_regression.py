@@ -111,7 +111,7 @@ def test_qufl_regression():
         zip(list(chain(*is_assigned)), list(chain(*assignment_costs)))
     ]
 
-    qufl_lazy_model = LazyConvexEngine(qufl_model, objective_fns, objective_vars)
+    qufl_lazy_model = LazyConvexEngine(qufl_model, objective_fns)
 
     qufl_lazy_model.optimize()
 
