@@ -10,14 +10,17 @@ TOLERANCE = 10**(-5)
 
 
 @pytest.mark.regression
-def test_qufl_regression():
+@pytest.mark.parametrize(
+    "num_facilities", [5, 20, 40]
+)
+def test_qufl_regression(num_facilities):
     """
     Generates an instance of the quadratic uncapacitated facility
     location problem (qUFL), and a gurobi model to solve it.
 
     Uses the Kochetov and Ivanenko cost structure.
     """
-    facilities = range(7)
+    facilities = range(num_facilities)
 
     facility_costs = [3000 for facility in facilities]
     assignment_costs = [
