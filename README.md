@@ -1,5 +1,5 @@
-# lazyConvex
-Uses Convex outer approximation and dynamic constraint generation within
+# LazyConvex
+Uses convex outer approximation and dynamic constraint generation within
 branch and bound to solve convex mixed-integer nonlinear programming problems
 with Gurobi and Python.
 
@@ -12,7 +12,7 @@ x >= 0, y in Y
 where `f(x)` is convex and non-negative (or a sum of such functions), the
 variables `x` are continuous, and the variables `y` are mixed-integer.
 
-The basic principle is to approximate `f(x)`, with supporting hyperplanes of the form
+The basic principle is to approximate `f(x)` with supporting hyperplanes of the form
 ```
 f(x) >= f(a) + grad(f)(a) * (x-a)
 ```
