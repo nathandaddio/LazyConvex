@@ -17,7 +17,8 @@ The basic principle is to approximate `f(x)` with supporting hyperplanes of the 
 f(x) >= f(a) + grad(f)(a) * (x-a)
 ```
 where `a` is a solution to the problem. Note that these constraints
-are linear.
+are linear, and always provide a valid underapproximation of the objective.
+See a convex analysis textbook for a proof.
 
 We solve a mixed-integer linear
 programming problem (MILP) and dynamically add these constraints as solutions
