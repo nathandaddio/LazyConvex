@@ -21,3 +21,5 @@ engine.optimize()
 This will then utilise Gurobi's lazy constraints to dynamically approximate the value of the objective function.
 
 Has further functionality around adding starting cuts and warm starting at the root node.
+Also handles some of Gurobi's issues around posting heuristics to
+ensure that the best objective is updated properly.

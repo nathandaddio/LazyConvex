@@ -74,9 +74,7 @@ class LazyConvexEngine(object):
             (objective_function, num):
                 self._add_approximation(
                     model=self._model,
-                    approximation_variable=self._approximation_variables[objective_function],
                     objective_function=objective_function,
-                    actual_value=objective_function.get_objective(starting_values),
                     objective_variable_values=starting_values,
                     constraint_adder=self._model.addConstr
                 )
@@ -119,14 +117,11 @@ class LazyConvexEngine(object):
                 total_gap += actual_value - approximation_value
                 if actual_value - approximation_value > TOLERANCE:
                     self._add_approximation(
-                        model, approximation_variable, objective_function, actual_value,
-                        objective_variable_values
+                        model, objective_function, objective_variable_values
                     )
 
             # Check for a new best solution to save it away
             if at_mip_sol:
-                # Need to calculate the actual objective by removing the approximation
-                # values
                 actual_objective = (model.cbGet(MIPSOL_OBJ) + total_gap)
                 if actual_objective < self._best_solution:
                     self._best_solution = actual_objective
@@ -140,20 +135,31 @@ class LazyConvexEngine(object):
 
         return approximation_value, objective_variable_values, actual_value
 
-    def _add_approximation(self, model, approximation_variable, objective_function,
-                           actual_value, objective_variable_values,
-                           constraint_adder=None):
+    def _add_approximation(self, model, objective_function,
+                           objective_variable_values, constraint_adder=None):
         """
-        Adds convex outer approximation of the form
+        Adds a convex outer approximation of the form
+        ```
         f(x) >= f(a) + grad(f)(a) * (x-a)
+        ```
+
+        Args:
+            model: the gurobi model to add the constraint to
+            objective_function: the objective function to approximate,
+                (`f` in the above equation)
+            objective_variable_values: the values of the variables in the
+                objective function, which forms the location where the
+                approximation will occur (`a` in the above equation)
+            constraint_adder: a callable that adds a constraint to model
         """
+        actual_value = objective_function.get_objective(objective_variable_values)
         gradient = objective_function.get_gradient(objective_variable_values)
 
         if constraint_adder is None:
             constraint_adder = model.cbLazy
 
         return constraint_adder(
-            approximation_variable >=
+            self._approximation_variables[objective_function] >=
             actual_value +
             gurobipy.quicksum(
                 grad * (var - value)
