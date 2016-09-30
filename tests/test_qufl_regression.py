@@ -94,8 +94,6 @@ def test_qufl_regression(num_facilities):
 
     from itertools import chain
 
-    objective_vars = list(chain(*is_assigned))
-
     def get_obj_fn(assignment_cost):
         def f(x):
             return assignment_cost * x ** 2
