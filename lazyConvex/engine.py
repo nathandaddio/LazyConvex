@@ -105,31 +105,32 @@ class LazyConvexEngine(object):
 
         if at_mip_node and self._use_heuristic:
             if model.cbGet(MIPNODE_BEST_SOLUTION) > self._best_solution:
-                model.cbSet(self._model_variables, self._best_solution_values)
+                model.cbSetSolution(self._model_variables, self._best_solution_values)
                 return
 
         if at_mip_sol or at_root_node:
+            # Keep track of the gap between the approximation and
+            # the actual objective
+            total_gap = 0
             for objective_function in self._objective_functions:
                 approximation_variable = self._approximation_variables[objective_function]
                 values = self._get_values(approximation_variable, objective_function, model, where)
                 approximation_value, objective_variable_values, actual_value = values
-
-                # Check for a new best solution to save it away
-                if at_mip_sol:
-                    # Need to calculate the actual objective by removing the approximation
-                    # values
-                    actual_objective = (model.cbGet(MIPSOL_OBJ) -
-                                        approximation_value +
-                                        actual_value)
-                    if actual_objective < self._best_solution:
-                        self._best_solution = actual_objective
-                        self._best_solution_values = model.cbGetSolution(self._model_variables)
-
+                total_gap += actual_value - approximation_value
                 if actual_value - approximation_value > TOLERANCE:
                     self._add_approximation(
                         model, approximation_variable, objective_function, actual_value,
                         objective_variable_values
                     )
+
+            # Check for a new best solution to save it away
+            if at_mip_sol:
+                # Need to calculate the actual objective by removing the approximation
+                # values
+                actual_objective = (model.cbGet(MIPSOL_OBJ) + total_gap)
+                if actual_objective < self._best_solution:
+                    self._best_solution = actual_objective
+                    self._best_solution_values = model.cbGetSolution(self._model_variables)
 
     def _get_values(self, approximation_variable, objective_function, model, where):
         get_value = get_value_lookup(model, where)

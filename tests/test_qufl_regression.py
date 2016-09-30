@@ -9,9 +9,13 @@ from lazyConvex import LazyConvexEngine, ObjectiveFunction
 TOLERANCE = 10**(-5)
 
 
+def gap_within_tolerance(actual, other):
+    return abs(actual-other) / actual < TOLERANCE
+
+
 @pytest.mark.regression
 @pytest.mark.parametrize(
-    "num_facilities", [5, 20, 40]
+    "num_facilities", [5, 10, 20]
 )
 def test_qufl_regression(num_facilities):
     """
@@ -36,7 +40,7 @@ def test_qufl_regression(num_facilities):
     ]
 
     is_assigned = [
-        [qufl_model.addVar(vtype=gurobipy.GRB.BINARY) for facility in facilities]
+        [qufl_model.addVar() for facility in facilities]
         for facility in facilities
     ]
 
@@ -81,8 +85,6 @@ def test_qufl_regression(num_facilities):
 
     naive_objective = qufl_model.objVal
 
-    # TODO: generate lazy convex model here, solve
-
     # Need to set the model back to an unoptimised state
     # so that we get rid of the old solve information
     qufl_model.reset()
@@ -104,6 +106,8 @@ def test_qufl_regression(num_facilities):
             return [2 * assignment_cost * x]
         return g
 
+    # Get an objective function for each assignment variable to completely
+    # disaggregate the problem
     objective_fns = [
         ObjectiveFunction(
             get_obj_fn(assign_cost), get_grad_fn(assign_cost), [objective_var], [[0.5]]
@@ -116,4 +120,6 @@ def test_qufl_regression(num_facilities):
 
     qufl_lazy_model.optimize()
 
-    assert abs(naive_objective - qufl_lazy_model.objVal) < TOLERANCE
+    assert gap_within_tolerance(naive_objective, qufl_lazy_model.objVal)
+
+    assert gap_within_tolerance(qufl_lazy_model._best_solution, qufl_lazy_model._model.objVal)
